@@ -1,37 +1,76 @@
 <template>
-  <div class="container py-4">
-    <h3>Teléfonos reparados</h3>
+  <div class="container">
+    <h3>📦 Teléfonos listos para entregar</h3>
 
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Cliente</th>
-          <th>Teléfono</th>
-          <th>Acción</th>
-        </tr>
-      </thead>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Teléfono</th>
+            <th>Problema</th>
+            <th>Correo</th>
+            <th>Estado</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
 
-      <tbody>
-        <tr v-for="t in reparados" :key="t.id">
-          <td>{{ t.cliente }}</td>
-          <td>{{ t.marca }} {{ t.modelo }}</td>
-          <td>
-            <button class="btn btn-primary btn-sm" @click="entregar(t)">
-              Entregar
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+        <tbody>
+          <tr v-for="e in equipos" :key="e.id">
+            <td>{{ e.cliente?.nombre }}</td>
+            <td>{{ e.marca }} {{ e.modelo }}</td>
+            <td>{{ e.problema }}</td>
+            <td>{{ e.cliente?.correo || 'Sin correo' }}</td>
+            <td>
+              <span class="estado reparado">
+                Reparado
+              </span>
+            </td>
+            <td>
+              <button
+                class="btn btn-primary"
+                @click="entregarEquipo(e.id)"
+              >
+                Entregar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p v-if="equipos.length === 0" class="empty">
+        No hay teléfonos listos para entregar.
+      </p>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { onMounted, ref } from 'vue'
+import api from '../api/client'
 
-const reparados = ref([]);
+const equipos = ref([])
 
-const entregar = (t) => {
-  console.log("Entregado", t);
-};
+const cargarEquipos = async () => {
+  const { data } = await api.get('/equipos?estado=REPARADO')
+  equipos.value = data
+}
+
+const entregarEquipo = async (id) => {
+  const confirmar = confirm('¿Confirmas que el teléfono fue entregado?')
+
+  if (!confirmar) return
+
+  await api.patch(`/equipos/${id}/estado`, {
+    estado: 'ENTREGADO',
+  })
+
+  alert('✅ Equipo marcado como entregado')
+
+  await cargarEquipos()
+}
+
+onMounted(() => {
+  cargarEquipos()
+})
 </script>

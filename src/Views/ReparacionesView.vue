@@ -1,53 +1,105 @@
 <template>
-  <div class="container py-4">
-    <h3>Teléfonos en reparación</h3>
+  <div class="container">
+    <h3>🛠 Teléfonos en reparación</h3>
 
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Cliente</th>
-          <th>Teléfono</th>
-          <th>Problema</th>
-          <th>Estado</th>
-          <th>Acción</th>
-        </tr>
-      </thead>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Teléfono</th>
+            <th>Problema</th>
+            <th>Estado</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
 
-      <tbody>
-        <tr v-for="t in telefonos" :key="t.id">
-          <td>{{ t.cliente }}</td>
-          <td>{{ t.marca }} {{ t.modelo }}</td>
-          <td>{{ t.problema }}</td>
-          <td>{{ t.estado }}</td>
-          <td>
-            <button class="btn btn-success btn-sm" @click="marcarReparado(t)">
-              Marcar reparado
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+        <tbody>
+          <tr v-for="e in equipos" :key="e.id">
+            <td>{{ e.cliente?.nombre }}</td>
+            <td>{{ e.marca }} {{ e.modelo }}</td>
+            <td>{{ e.problema }}</td>
+            <td>
+              <span :class="['estado', claseEstado(e.estado)]">
+                {{ textoEstado(e.estado) }}
+              </span>
+            </td>
+            <td>
+              <button
+                v-if="e.estado === 'PENDIENTE'"
+                class="btn btn-primary"
+                @click="cambiarEstado(e.id, 'EN_PROCESO')"
+              >
+                Iniciar
+              </button>
+
+              <button
+                v-else-if="e.estado === 'EN_PROCESO'"
+                class="btn btn-success"
+                @click="cambiarEstado(e.id, 'REPARADO')"
+              >
+                Marcar reparado
+              </button>
+
+              <span v-else>
+                Sin acción
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p v-if="equipos.length === 0" class="empty">
+        No hay teléfonos registrados.
+      </p>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { onMounted, ref } from 'vue'
+import api from '../api/client'
 
-const telefonos = ref([
-  {
-    id: 1,
-    cliente: "Juan Perez",
-    marca: "Samsung",
-    modelo: "A20",
-    problema: "Pantalla rota",
-    estado: "pendiente",
-  },
-]);
+const equipos = ref([])
 
-const marcarReparado = (t) => {
-  t.estado = "reparado";
+const cargarEquipos = async () => {
+  const { data } = await api.get('/equipos')
+  equipos.value = data.filter((e) => e.estado !== 'ENTREGADO')
+}
 
-  // Aquí luego llamas tu API
-  console.log("Enviar correo...");
-};
+const cambiarEstado = async (id, estado) => {
+  await api.patch(`/equipos/${id}/estado`, { estado })
+
+  if (estado === 'REPARADO') {
+    alert('✅ Equipo reparado. Si el cliente tiene correo, se envió notificación.')
+  }
+
+  await cargarEquipos()
+}
+
+const textoEstado = (estado) => {
+  const estados = {
+    PENDIENTE: 'Pendiente',
+    EN_PROCESO: 'En proceso',
+    REPARADO: 'Reparado',
+    ENTREGADO: 'Entregado',
+  }
+
+  return estados[estado] || estado
+}
+
+const claseEstado = (estado) => {
+  const clases = {
+    PENDIENTE: 'pendiente',
+    EN_PROCESO: 'enproceso',
+    REPARADO: 'reparado',
+    ENTREGADO: 'entregado',
+  }
+
+  return clases[estado] || ''
+}
+
+onMounted(() => {
+  cargarEquipos()
+})
 </script>
