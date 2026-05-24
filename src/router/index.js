@@ -8,7 +8,6 @@ import Entregas from '../views/EntregasView.vue'
 const routes = [
   { path: '/login', component: LoginView },
 
-  { path: '/', component: NuevoIngreso, meta: { requiresAuth: true } },
   { path: '/nuevo', component: NuevoIngreso, meta: { requiresAuth: true } },
   { path: '/reparaciones', component: Reparaciones, meta: { requiresAuth: true } },
   { path: '/entregas', component: Entregas, meta: { requiresAuth: true } },
