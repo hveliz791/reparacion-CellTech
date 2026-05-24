@@ -3,7 +3,7 @@
 
   <div v-else :class="['layout', { dark: darkMode }]">
     <aside :class="['sidebar', { open: menuOpen }]">
-      <h2 class="logo">📱 CellTech</h2>
+      <h2 class="logo">📱 TechFix</h2>
 
       <nav>
         <router-link to="/nuevo" @click="cerrarMenu">➕ Nuevo ingreso</router-link>

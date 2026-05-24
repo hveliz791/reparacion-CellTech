@@ -1,13 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-import LoginView from '../views/LoginView.vue'
-import NuevoIngreso from '../views/NuevoIngresoView.vue'
-import Reparaciones from '../views/ReparacionesView.vue'
-import Entregas from '../views/EntregasView.vue'
+import LoginView from '../Views/LoginView.vue'
+import NuevoIngreso from '../Views/NuevoIngresoView.vue'
+import Reparaciones from '../Views/ReparacionesView.vue'
+import Entregas from '../Views/EntregasView.vue'
 
 const routes = [
   { path: '/login', component: LoginView },
 
+  { path: '/', component: NuevoIngreso, meta: { requiresAuth: true } },
   { path: '/nuevo', component: NuevoIngreso, meta: { requiresAuth: true } },
   { path: '/reparaciones', component: Reparaciones, meta: { requiresAuth: true } },
   { path: '/entregas', component: Entregas, meta: { requiresAuth: true } },
